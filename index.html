@@ -173,17 +173,61 @@ td.empty{text-align:left;font-family:var(--font-body);color:var(--muted);white-s
 .frac>span:first-child{border-bottom:2px solid currentColor;padding:0 3px 2px}
 .frac>span:last-child{padding-top:2px}
 .law-text{font-size:14px;color:var(--muted);flex:1 1 200px}
+/* Kopfzeile + Kausalkette */
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px 24px}
+.top-text{min-width:0;flex:1 1 420px}
+.btn-chain{font-size:15px;padding:11px 18px}
+dialog#chain{width:min(640px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:20px}
+dialog#chain::backdrop{background:rgb(8 14 12 / .55)}
+.dlg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.dlg-head h2{margin:0}
+.dlg-x{font:400 26px/1 var(--font-body);background:none;border:1px solid transparent;border-radius:6px;color:var(--muted);cursor:pointer;padding:2px 9px}
+.dlg-x:hover{border-color:var(--line);color:var(--ink)}
+.chain-list{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.ci{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 10px 10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);cursor:grab;user-select:none;transition:border-color .15s,background .15s}
+.ci.dragging{opacity:.45}
+.ci.over{border-color:var(--prim);border-style:dashed}
+.ci.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--surface-2))}
+.ci.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--surface-2))}
+.ci-num{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);font:600 14px var(--font-mono)}
+.ci.right .ci-num{background:var(--ok)} .ci.wrong .ci-num{background:var(--bad)}
+.ci-text{line-height:1.45}
+.ci-move{display:flex;flex-direction:column;gap:4px}
+.ci-move button{font:600 14px/1 var(--font-mono);width:32px;height:28px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+.ci-move button:disabled{opacity:.3;cursor:default}
+.chain-result{margin:14px 0 0;font-weight:500;min-height:1.4em}
+.chain-result.ok{color:var(--ok)} .chain-result.no{color:var(--bad)}
+.chain-fazit{margin-top:10px;padding:12px 14px;border-radius:8px;background:var(--info-soft);color:var(--info)}
+dialog#chain .pf-actions{margin-top:16px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
 <div class="wrap">
-  <header>
-    <p class="eyebrow">Physik · Jahrgangsstufe 10 · Elektromagnetische Induktion</p>
-    <h1>Transformator-Labor</h1>
-    <p class="lede">Wähle zwei Spulen aus der Sammlung, stelle die Spannung am Netzgerät ein und miss, was auf der Sekundärseite ankommt. Alle Messgeräte zeigen Effektivwerte.</p>
+  <header class="top">
+    <div class="top-text">
+      <p class="eyebrow">Physik · Jahrgangsstufe 10 · Elektromagnetische Induktion</p>
+      <h1>Transformator-Labor</h1>
+      <p class="lede">Wähle zwei Spulen aus der Sammlung, stelle die Spannung am Netzgerät ein und miss, was auf der Sekundärseite ankommt. Alle Messgeräte zeigen Effektivwerte.</p>
+    </div>
+    <button type="button" class="btn btn-primary btn-chain" id="chainOpen">Kausalkette</button>
   </header>
+
+  <dialog id="chain" aria-labelledby="chainTitle">
+    <div class="dlg-head">
+      <h2 id="chainTitle">Kausalkette: Wie funktioniert ein Transformator?</h2>
+      <button type="button" class="dlg-x" id="chainClose" aria-label="Fenster schließen">×</button>
+    </div>
+    <p class="hint">Bringe die Schritte in die richtige Reihenfolge: Jeder Schritt ist die Ursache für den nächsten. Ziehe die Karten an die richtige Stelle oder verschiebe sie mit den Pfeilen.</p>
+    <ol class="chain-list" id="chainList"></ol>
+    <p class="chain-result" id="chainResult" aria-live="polite"></p>
+    <div class="chain-fazit" id="chainFazit" hidden><b>Merke:</b> Ein Transformator funktioniert nur mit Wechselspannung, weil eine dauerhafte Induktionsspannung eine dauerhafte Magnetfeldänderung benötigt.</div>
+    <div class="pf-actions">
+      <button type="button" class="btn btn-primary" id="chainCheck">Prüfen</button>
+      <button type="button" class="btn" id="chainShuffle">Neu mischen</button>
+    </div>
+  </dialog>
 
   <main class="lab">
     <section class="stage" aria-label="Versuchsaufbau und Messwerte">
@@ -775,6 +819,88 @@ td.empty{text-align:left;font-family:var(--font-body);color:var(--muted);white-s
     g.fillText("N₁ = " + nInt.format(S.N1), 322, 390);
     g.fillText("N₂ = " + nInt.format(S.N2), 578, 390);
   }
+
+  /* ---------- Kausalkette ---------- */
+  const STEPS = [
+    "An die Primärspule wird die Wechselspannung U₁ angelegt, deshalb fließt in ihr Wechselstrom.",
+    "Der Wechselstrom erzeugt ein sich ständig änderndes Magnetfeld („Wechselmagnetfeld“).",
+    "Der Eisenkern verstärkt das Magnetfeld und verlängert es in die Sekundärspule hinein.",
+    "Zwischen den Enden der Sekundärspule entsteht durch das Wechselmagnetfeld eine Induktionsspannung U₂."
+  ];
+  const dlg = $("chain"), list = $("chainList");
+  let order = [], checked = false, dragFrom = null;
+  function shuffleChain() {
+    do {
+      order = STEPS.map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    } while (order.some((v, i) => v === i) && Math.random() < .8 || order.every((v, i) => v === i));
+    resetCheck(); renderChain();
+  }
+  function resetCheck() {
+    checked = false;
+    $("chainResult").textContent = ""; $("chainResult").className = "chain-result";
+    $("chainFazit").hidden = true;
+  }
+  function renderChain(focusId) {
+    list.innerHTML = "";
+    order.forEach((id, pos) => {
+      const li = document.createElement("li");
+      li.className = "ci" + (checked ? (id === pos ? " right" : " wrong") : "");
+      li.draggable = true; li.dataset.pos = pos;
+      li.innerHTML = `<span class="ci-num">${pos + 1}</span><span class="ci-text"></span>
+        <span class="ci-move"><button type="button" data-d="-1" aria-label="Nach oben schieben">↑</button><button type="button" data-d="1" aria-label="Nach unten schieben">↓</button></span>`;
+      li.querySelector(".ci-text").textContent = STEPS[id];
+      li.querySelector('[data-d="-1"]').disabled = pos === 0;
+      li.querySelector('[data-d="1"]').disabled = pos === order.length - 1;
+      list.appendChild(li);
+    });
+    if (focusId) { const b = list.querySelector(`li[data-pos="${focusId[0]}"] [data-d="${focusId[1]}"]`); if (b && !b.disabled) b.focus(); else { const o = list.querySelector(`li[data-pos="${focusId[0]}"] button:not(:disabled)`); if (o) o.focus(); } }
+  }
+  function move(from, to) {
+    if (to < 0 || to >= order.length || from === to) return;
+    const [x] = order.splice(from, 1); order.splice(to, 0, x);
+    resetCheck();
+  }
+  list.addEventListener("click", e => {
+    const b = e.target.closest("button[data-d]"); if (!b) return;
+    const pos = +b.closest("li").dataset.pos, d = +b.dataset.d;
+    move(pos, pos + d); renderChain([pos + d, b.dataset.d]);
+  });
+  list.addEventListener("dragstart", e => {
+    const li = e.target.closest("li"); if (!li) return;
+    dragFrom = +li.dataset.pos; li.classList.add("dragging");
+    e.dataTransfer.effectAllowed = "move";
+    try { e.dataTransfer.setData("text/plain", String(dragFrom)); } catch (err) {}
+  });
+  list.addEventListener("dragover", e => {
+    const li = e.target.closest("li"); if (!li || dragFrom === null) return;
+    e.preventDefault();
+    list.querySelectorAll(".over").forEach(x => x.classList.remove("over"));
+    if (+li.dataset.pos !== dragFrom) li.classList.add("over");
+  });
+  list.addEventListener("drop", e => {
+    const li = e.target.closest("li"); if (!li || dragFrom === null) return;
+    e.preventDefault(); move(dragFrom, +li.dataset.pos); dragFrom = null; renderChain();
+  });
+  list.addEventListener("dragend", () => { dragFrom = null; renderChain(); });
+  $("chainCheck").addEventListener("click", () => {
+    checked = true; renderChain();
+    const right = order.filter((v, i) => v === i).length, r = $("chainResult");
+    if (right === STEPS.length) {
+      r.textContent = "✓ Richtig! Jeder Schritt ist die Ursache für den nächsten.";
+      r.className = "chain-result ok"; $("chainFazit").hidden = false;
+    } else {
+      r.textContent = `${right} von ${STEPS.length} Schritten stehen an der richtigen Stelle. Frage dich bei jedem Schritt: Was ist die Ursache, was die Folge?`;
+      r.className = "chain-result no";
+    }
+  });
+  $("chainShuffle").addEventListener("click", shuffleChain);
+  $("chainOpen").addEventListener("click", () => {
+    shuffleChain();
+    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+  });
+  $("chainClose").addEventListener("click", () => { if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); });
+  dlg.addEventListener("click", e => { if (e.target === dlg && dlg.close) dlg.close(); });
 
   function loop(now) { if (!document.hidden) drawCircuit(now); requestAnimationFrame(loop); }
   window.addEventListener("resize", drawScope);
