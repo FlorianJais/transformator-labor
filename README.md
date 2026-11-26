@@ -2,7 +2,7 @@
 
 Interaktive Simulation zum Transformator für die 10. Jahrgangsstufe (Physik, Gymnasium Bayern).
 
-Die Schülerinnen und Schüler wählen Primär- und Sekundärspule, stellen die Spannung am Netzgerät ein, schließen einen Verbraucher an und tragen Messwerte in ein Protokoll ein. So entdecken sie die Gesetze am idealen Transformator:
+Die Schülerinnen und Schüler wählen Primär- und Sekundärspule, stellen die Spannung am Netzgerät ein, schließen einen Energiewandler an und tragen Messwerte in ein Protokoll ein. So entdecken sie die Gesetze am idealen Transformator:
 
 - U₁ / U₂ = N₁ / N₂
 - I₁ / I₂ = N₂ / N₁

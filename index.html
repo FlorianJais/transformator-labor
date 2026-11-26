@@ -239,7 +239,7 @@ dialog#chain .pf-actions{margin-top:16px}
   <main class="lab">
     <section class="stage" aria-label="Versuchsaufbau und Messwerte">
       <div class="panel">
-        <canvas id="circuit" width="900" height="400" role="img" aria-label="Schaltskizze: Netzgerät mit Primärspule, Eisenkern, Sekundärspule mit Verbraucher, dazu Strom- und Spannungsmessgeräte"></canvas>
+        <canvas id="circuit" width="900" height="400" role="img" aria-label="Schaltskizze: Netzgerät mit Primärspule, Eisenkern, Sekundärspule mit Energiewandler, dazu Strom- und Spannungsmessgeräte"></canvas>
         <p class="caption">Modell: idealer Transformator ohne Verluste. Netzfrequenz 50 Hz; die Bewegung der Ladungen und das Magnetfeld sind stark verlangsamt dargestellt.</p>
       </div>
 
@@ -303,10 +303,10 @@ dialog#chain .pf-actions{margin-top:16px}
           <div class="chips" id="chipsN2" role="radiogroup" aria-labelledby="n2lbl"></div>
         </div>
         <div class="ctrl">
-          <div class="ctrl-head"><label for="rr">Widerstand des Verbrauchers R</label><output id="rout" for="rr"></output></div>
+          <div class="ctrl-head"><label for="rr">Widerstand des Energiewandlers R</label><output id="rout" for="rr"></output></div>
           <input type="range" id="rr" min="0" max="400" step="1" value="200">
           <div class="scale"><span>1 Ω</span><span>100 Ω</span><span>10 kΩ</span></div>
-          <label class="check"><input type="checkbox" id="open"> <span>Schalter offen (Leerlauf, kein Verbraucher angeschlossen)</span></label>
+          <label class="check"><input type="checkbox" id="open"> <span>Schalter offen (Leerlauf, kein Energiewandler angeschlossen)</span></label>
         </div>
       </section>
 
@@ -355,7 +355,7 @@ dialog#chain .pf-actions{margin-top:16px}
       <ol>
         <li>Lass N<sub>1</sub> und U<sub>1</sub> unverändert und probiere verschiedene Sekundärspulen aus. Trage jeweils einen Messwert ins Protokoll ein. Wie hängt U<sub>2</sub> von N<sub>2</sub> ab?</li>
         <li>Blende die Verhältnisse ein und vergleiche U<sub>1</sub>/U<sub>2</sub> mit N<sub>1</sub>/N<sub>2</sub>. Formuliere einen Je-desto-Satz und eine Gleichung.</li>
-        <li>Schließe einen Verbraucher an und untersuche die Stromstärken I<sub>1</sub> und I<sub>2</sub> für mehrere Spulenpaare. Welcher Zusammenhang besteht zu den Windungszahlen?</li>
+        <li>Schließe einen Energiewandler an und untersuche die Stromstärken I<sub>1</sub> und I<sub>2</sub> für mehrere Spulenpaare. Welcher Zusammenhang besteht zu den Windungszahlen?</li>
         <li>Berechne für eine Messung P<sub>1</sub> = U<sub>1</sub> · I<sub>1</sub> und P<sub>2</sub> = U<sub>2</sub> · I<sub>2</sub>. Begründe damit das Gesetz für die Stromstärken.</li>
         <li>Stelle auf Gleichspannung um. Erkläre, warum der Transformator dann nicht funktioniert.</li>
         <li>Plane einen Transformator, der aus 230 V eine Spannung von 11,5 V macht. Welche Spulen würdest du wählen?</li>
@@ -801,7 +801,7 @@ dialog#chain .pf-actions{margin-top:16px}
     g.fillStyle = C.surface;
     for (const x of [760, 790]) { g.beginPath(); g.arc(x, 120, 4, 0, Math.PI * 2); g.fill(); g.lineWidth = 2; g.stroke(); }
 
-    // Verbraucher
+    // Energiewandler
     g.fillStyle = C.surface; g.fillRect(798, 166, 24, 68);
     g.lineWidth = 2.5; g.strokeStyle = C.wire; g.strokeRect(798, 166, 24, 68);
 
@@ -815,7 +815,7 @@ dialog#chain .pf-actions{margin-top:16px}
     g.fillText("U₁ = " + u1fmt(S.U1), 90, 340);
     g.textAlign = "left";
     g.fillStyle = C.muted; g.font = '500 14px "IBM Plex Sans", system-ui, sans-serif';
-    g.textAlign = "center"; g.fillText("Verbraucher", 810, 152); g.textAlign = "left";
+    g.textAlign = "center"; g.fillText("Energiewandler", 810, 152); g.textAlign = "left";
     g.fillStyle = C.ink; g.font = '500 15px "IBM Plex Mono", monospace';
     g.fillText("R =", 832, 196); g.fillText(qs(S.R, "Ω"), 832, 216);
     g.textAlign = "center";
